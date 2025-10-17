@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Hue - Your Path to Calm</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        /* --- Base & Reset --- */
+        :root {
+            --color-teal: #14b8a6;
+            --color-teal-dark: #0d9488;
+            --color-sky: #0ea5e9;
+            --color-sky-dark: #0284c7;
+            --color-gray-text: #374151;
+            --color-gray-light: #6b7280;
+            --color-gray-border: #d1d5db;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--color-gray-text);
+            line-height: 1.6;
+            transition: background 0.8s ease;
+        }
+        .animated-pastel-gradient {
+            background: linear-gradient(110deg, #a1c4fd 0%, #ffc2e9 25%, #f6e58d 50%, #c5f6a7 75%, #d4a5f5 100%);
+            background-size: 150% 150%;
+            animation: gradient-animation 18s ease infinite;
+        }
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- Mood Backgrounds for Body --- */
+        .body-mood-great { background: linear-gradient(120deg, #fde047, #f97316); }
+        .body-mood-good { background: linear-gradient(120deg, #86efac, #2dd4bf); }
+        .body-mood-okay { background: linear-gradient(120deg, #93c5fd, #60a5fa); }
+        .body-mood-bad { background: linear-gradient(120deg, #c4b5fd, #818cf8); }
+        .body-mood-terrible { background: linear-gradient(120deg, #9ca3af, #4b5563); }
+
+
+        /* --- Layout --- */
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .grid { display: grid; }
+        .gap-8 { gap: 2rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .flex-grow { flex-grow: 1; }
+
+        /* --- Header & Navigation --- */
+        #main-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            transition: background-color 0.3s, box-shadow 0.3s, backdrop-filter 0.3s;
+        }
+        #main-header.scrolled {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow-md);
+        }
+        .header-nav {
+            height: 4rem;
+        }
+        .logo-container {
+            gap: 0.75rem;
+        }
+        .logo-icon {
+            height: 2rem;
+            width: 2rem;
+            color: var(--color-teal);
+        }
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        .desktop-nav {
+            gap: 1.5rem;
+        }
+        .nav-link {
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s ease;
+            text-decoration: none;
+            color: var(--color-gray-text);
+            padding: 0.25rem;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--color-teal);
+            transition: width 0.3s ease;
+        }
+        .nav-link.active {
+            color: var(--color-teal);
+        }
+        .nav-link.active::after {
+            width: 100%;
+        }
+        .nav-link:hover {
+            color: var(--color-teal);
+        }
+        .mobile-menu-button {
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        #mobile-menu {
+            display: none;
+            background-color: white;
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            box-shadow: var(--shadow-md);
+        }
+        #mobile-menu a { 
+            display: block; 
+            padding: 1rem;
+            text-align: center;
+        }
+        #mobile-menu a:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* --- Page Sections --- */
+        main {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        [data-page] { display: none; }
+        [data-page].active { display: block; }
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .page-header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+        .page-header p {
+            font-size: 1.125rem;
+            color: var(--color-gray-light);
+            max-width: 600px;
+            margin: 0.5rem auto 0;
+        }
+
+
+        /* --- Home Page --- */
+        .home-hero-card {
+            padding: 0;
+            overflow: hidden;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+        }
+        .home-hero-content {
+            padding: 2rem;
+        }
+        .home-hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+        .home-hero-text {
+            margin-top: 1rem;
+            font-size: 1.125rem;
+            color: var(--color-gray-light);
+            max-width: 42rem;
+        }
+        .home-hero-button {
+            margin-top: 2rem;
+            padding: 0.75rem 2rem;
+            background-color: var(--color-teal);
+            color: white;
+            font-weight: 600;
+            border-radius: 9999px;
+            border: none;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .home-hero-button:hover {
+            background-color: var(--color-teal-dark);
+            transform: scale(1.05);
+        }
+        .home-hero-graphic {
+            padding: 2rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .features-section { margin-top: 4rem; }
+        .features-title { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 2.5rem; }
+        .feature-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .feature-icon-wrapper {
+            flex-shrink: 0;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .feature-icon-wrapper svg { width: 1.5rem; height: 1.5rem; }
+        .feature-card h3 { font-size: 1.125rem; font-weight: 600; }
+        .feature-card p { margin-top: 0.25rem; font-size: 0.875rem; color: var(--color-gray-light); }
+
+        /* --- Common Card Styles --- */
+        .page-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* --- Mood Tracker Page --- */
+        .mood-selection-area {
+            background-color: rgba(255, 255, 255, 0.6);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+
+        .mood-tracker-card {
+            border: 2px solid transparent;
+            transition: background-color 0.5s ease, border-color 0.5s ease;
+            max-width: 56rem;
+            margin: 1rem auto 0;
+        }
+        .mood-tracker-card.mood-great { background-color: rgba(253, 224, 71, 0.1); border-color: rgba(253, 224, 71, 0.4); }
+        .mood-tracker-card.mood-good { background-color: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.4); }
+        .mood-tracker-card.mood-okay { background-color: rgba(96, 165, 250, 0.1); border-color: rgba(96, 165, 250, 0.4); }
+        .mood-tracker-card.mood-bad { background-color: rgba(167, 139, 250, 0.1); border-color: rgba(167, 139, 250, 0.4); }
+        .mood-tracker-card.mood-terrible { background-color: rgba(156, 163, 175, 0.1); border-color: rgba(156, 163, 175, 0.4); }
+
+        .mood-emojis { display: flex; justify-content: space-around; padding: 1rem 0; }
+        .mood-emoji { font-size: 2.5rem; cursor: pointer; transition: transform 0.2s, filter 0.2s; filter: grayscale(50%); opacity: 0.7; }
+        .mood-emoji:hover { transform: scale(1.25) translateY(-5px); filter: grayscale(0%); opacity: 1;}
+        .mood-emoji.selected { transform: scale(1.5); filter: grayscale(0%); opacity: 1;}
+
+        .mood-details-wrapper {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease, opacity 0.5s ease, margin-top 0.7s ease;
+        }
+        .mood-details-wrapper.visible {
+            opacity: 1;
+            max-height: 500px;
+        }
+
+        .section-divider {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0));
+            margin: 1.5rem 0;
+        }
+
+        .section-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .factor-grid {
+            display: grid;
+            gap: 0.75rem;
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .factor-btn {
+            background-color: #f3f4f6;
+            border: 1px solid var(--color-gray-border);
+            color: var(--color-gray-text);
+            padding: 0.75rem 0.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        .factor-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        textarea {
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid var(--color-gray-border);
+            border-radius: 0.5rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-teal);
+            box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.3);
+        }
+        .log-mood-button {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: var(--color-teal);
+            color: white;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: none;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .log-mood-button:hover {
+            background-color: var(--color-teal-dark);
+        }
+        #log-confirmation { text-align: center; margin-top: 1rem; color: #16a34a; font-weight: 600; opacity: 0; transition: opacity 0.3s;}
+        
+        .dotted-textarea {
+            background-color: #fafaff;
+            background-image: radial-gradient(rgba(196, 181, 253, 0.4) 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+
+        /* --- Two-column layout for Journal & Capsule --- */
+        .two-column-layout {
+            display: grid;
+            gap: 2rem;
+        }
+        @media(min-width: 768px) {
+            .two-column-layout {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+        .sidebar-card {
+             background-color: rgba(255, 255, 255, 0.6);
+             padding: 1.5rem;
+             border-radius: 1rem;
+             height: fit-content;
+        }
+
+        /* --- Journal Page --- */
+        #journal-entries-list { max-height: 500px; overflow-y: auto; padding-right: 0.5rem; }
+        #journal-entries-list > * + * { margin-top: 1rem; }
+        .journal-entry-card { background-color: white; padding: 1rem; border-radius: 0.5rem; box-shadow: var(--shadow-md); }
+        .journal-entry-card p:first-child { font-size: 0.875rem; color: var(--color-gray-light); }
+        .journal-entry-card p:last-child { margin-top: 0.5rem; white-space: pre-wrap; }
+        .save-entry-btn {
+            margin-top: 1rem; padding: 0.5rem 1.5rem; background-color: var(--color-teal); color: white;
+            font-weight: 600; border-radius: 0.5rem; border: none; cursor: pointer;
+        }
+
+        /* --- Exercises Page --- */
+        .exercises-container { max-width: 80rem; margin: auto; }
+        .exercises-container .grid { align-items: stretch; }
+        .page-card-full-height { 
+            display: flex; 
+            flex-direction: column; 
+            border: 2px solid var(--color-gray-border);
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+        }
+        .canvas-container {
+            flex-grow: 1;
+            min-height: 250px;
+            margin-top: auto;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        #lantern-canvas, #color-flow-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .breathing-circle-container { height: 12rem; display: flex; align-items: center; justify-content: center; }
+        .breathing-circle-wrapper { position: relative; width: 10rem; height: 10rem; }
+        .breathing-circle { position: absolute; inset: 0; background-color: #bae6fd; border-radius: 9999px; animation: breathe 8s ease-in-out infinite; }
+        .breathing-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 600; color: #0369a1; }
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.8); }
+            50% { transform: scale(1.1); }
+        }
+        .start-breathing-btn {
+            width: 100%; margin-top: 1.5rem; padding: 0.5rem; border-radius: 0.5rem;
+            background-color: var(--color-sky); color: white; font-weight: 600; border: none; cursor: pointer;
+        }
+        .grounding-list {
+            list-style: none;
+            margin-top: auto;
+            padding: 0;
+        }
+        .grounding-list li {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+        .grounding-list strong {
+            color: var(--color-teal);
+            display: block;
+            font-size: 1rem;
+        }
+
+        .canvas-toolbar {
+            display: flex; justify-content: flex-end; margin-top: 1rem;
+        }
+        .clear-canvas-btn {
+            background-color: #e5e7eb; color: var(--color-gray-text); border: none;
+            padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer;
+        }
+        
+        /* --- Time Capsule Page --- */
+        .capsule-form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .capsule-date-picker {
+            padding: 0.75rem;
+            border: 1px solid var(--color-gray-border);
+            border-radius: 0.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+        #capsules-list {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 1fr;
+        }
+        .capsule-item {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .capsule-item.locked {
+            background-color: #f3f4f6;
+        }
+        .capsule-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            flex-shrink: 0;
+        }
+        .capsule-item.locked .capsule-icon {
+            color: var(--color-gray-light);
+        }
+        .capsule-item.unlocked .capsule-icon {
+            color: var(--color-teal);
+        }
+        .capsule-info p { margin: 0; }
+
+        /* --- Modal --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 100;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            color: var(--color-gray-light);
+        }
+        #modal-message-content {
+            white-space: pre-wrap;
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+
+        /* --- Resources Page --- */
+        .resource-list {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 2rem;
+            border-radius: 1rem;
+        }
+        .resource-item { border-left: 4px solid var(--color-teal); padding-left: 1rem; margin-bottom: 1.5rem; }
+        .resource-item:last-child { margin-bottom: 0; }
+        .resource-item.emergency { border-color: #ef4444; }
+        .resource-item h3 { font-size: 1.25rem; font-weight: 700; }
+        .resource-item p { font-size: 1.125rem; }
+
+        /* --- Footer --- */
+        footer {
+            background-color: white;
+            margin-top: 3rem;
+            border-top: 1px solid #e5e7eb;
+            padding: 1.5rem 0;
+            text-align: center;
+            color: var(--color-gray-light);
+        }
+        .footer-emergency-text { color: #dc2626; font-weight: 700; }
+        .footer-copyright { margin-top: 0.5rem; font-size: 0.875rem; }
+
+        /* --- Animations & Utilities --- */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animated-svg-group {
+            animation: float 6s ease-in-out infinite;
+        }
+        .animated-svg-group:nth-child(2) { animation-delay: -3s; }
+        .animated-svg-group:nth-child(3) { animation-delay: -1.5s; }
+        .animated-svg-group:nth-child(4) { animation-delay: -4.5s; }
+
+
+        /* --- Responsive Design --- */
+        @media (min-width: 576px) {
+            .factor-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (min-width: 768px) {
+            .md-hidden { display: none; }
+            .md-desktop-nav { display: flex; }
+            .home-hero-card { grid-template-columns: repeat(2, 1fr); }
+            .home-hero-content { padding: 3rem; }
+            .home-hero-title { font-size: 3rem; }
+            .home-hero-text { font-size: 1.25rem; }
+            .features-section .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 1024px) {
+            .exercises-container .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 1023px) {
+            .exercises-container .grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 767px) {
+            .md-desktop-nav { display: none; }
+            .home-hero-graphic { display: none; }
+        }
+         @media (max-width: 575px) {
+            .factor-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body class="animated-pastel-gradient">
+
+    <div class="page-wrapper">
+        <!-- Header --><header id="main-header">
+            <nav class="container">
+                <div class="flex items-center justify-between header-nav">
+                    <div class="flex items-center logo-container">
+                        <svg class="logo-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l-2-2m2 2l2-2" />
+                        </svg>
+                        <span class="logo-text">Mood Hue</span>
+                    </div>
+                    <div class="desktop-nav md-desktop-nav">
+                        <a data-target="home" class="nav-link active">Home</a>
+                        <a data-target="tracker" class="nav-link">Mood Tracker</a>
+                        <a data-target="journal" class="nav-link">Journal</a>
+                        <a data-target="exercises" class="nav-link">Exercises</a>
+                        <a data-target="capsule" class="nav-link">Time Capsule</a>
+                        <a data-target="resources" class="nav-link">Resources</a>
+                    </div>
+                    <div class="md-hidden">
+                        <button id="mobile-menu-button" class="mobile-menu-button">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:1.5rem; height:1.5rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <div id="mobile-menu" class="md-hidden">
+                 <a data-target="home" class="nav-link active">Home</a>
+                 <a data-target="tracker" class="nav-link">Mood Tracker</a>
+                 <a data-target="journal" class="nav-link">Journal</a>
+                 <a data-target="exercises" class="nav-link">Exercises</a>
+                 <a data-target="capsule" class="nav-link">Time Capsule</a>
+                 <a data-target="resources" class="nav-link">Resources</a>
+            </div>
+        </header>
+
+        <!-- Main Content --><main class="container flex-grow">
+            <!-- Home Page --><section data-page="home" class="active">
+                <div class="home-hero-card grid">
+                    <div class="home-hero-content">
+                        <h1 class="home-hero-title">Find Your Serenity.</h1>
+                        <p class="home-hero-text">A compassionate space to track your emotions, practice self-care, and connect with support.</p>
+                        <button id="start-tracking-btn" class="home-hero-button">
+                            Start Tracking Your Mood
+                        </button>
+                    </div>
+                    <div class="home-hero-graphic">
+                        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <g transform="translate(100 100)">
+                                <!-- Flowing Shapes -->
+                                <g class="animated-svg-group">
+                                    <path d="M-13.9,56.5C-27.2,46.1,-52.8,40.1,-63.3,27.1C-73.8,14.1,-69.2,-5.8,-59.5,-21.2C-49.8,-36.6,-35,-47.5,-19.1,-53.9C-3.2,-60.3,13.8,-62.2,27.3,-56.3C40.8,-50.3,50.8,-36.5,58.8,-21.2C66.8,-5.9,72.8,11,68.9,25.8C65,40.6,51.2,53.2,36.9,59.3C22.6,65.4,7.8,65,-5.2,63.1C-18.2,61.2,-22.3,66.9,-13.9,56.5Z" fill="#a1c4fd" transform="scale(1.1) rotate(15)" opacity="0.7"/>
+                                </g>
+                                <g class="animated-svg-group">
+                                     <path d="M-29.3,55.4C-40.9,46.3,-54.3,33.5,-62.7,18.1C-71.1,2.7,-74.5,-15.3,-68.2,-29.4C-61.9,-43.5,-45.9,-53.7,-30.2,-61.2C-14.5,-68.7,0.9,-73.5,15.7,-70C30.5,-66.5,44.7,-54.7,55.1,-41.2C65.5,-27.7,72.1,-12.5,71.2,2.8C70.3,18.1,61.9,33.5,50.7,43.2C39.5,52.9,25.5,56.9,11.8,59.7C-1.8,62.5,-17.7,64.5,-29.3,55.4Z" fill="#c5f6a7" transform="scale(0.9) rotate(-30)" opacity="0.7"/>
+                                </g>
+                                 <!-- Central Figure -->
+                                <circle cx="0" cy="-15" r="18" fill="#f3f4f6"/>
+                                <path d="M-30,40 Q-20,10 0,5 Q20,10 30,40 C20,55 0,60 0,60 C0,60 -20,55 -30,40 Z" fill="#f3f4f6"/>
+                                <g class="animated-svg-group">
+                                    <path d="M-42.3,31.7C-54.8,20.4,-65.1,2.3,-62.4,-15.1C-59.7,-32.5,-44,-49.2,-27.2,-57.8C-10.3,-66.3,7.6,-66.6,24.3,-60.1C41,-53.6,56.4,-40.1,62,-24.5C67.6,-8.9,63.3,8.9,55,24.3C46.7,39.7,34.4,52.7,20.1,58.7C5.8,64.7,-10.5,63.7,-25.2,56.9C-39.9,50.1,-30.9,43.1,-42.3,31.7Z" fill="#ffc2e9" transform="scale(0.6) rotate(60)" opacity="0.7"/>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+                <div class="features-section">
+                    <h2 class="features-title">Features to Support Your Journey</h2>
+                    <div class="grid gap-8">
+                        <div class="feature-card">
+                            <div class="feature-icon-wrapper" style="background-color: #ccfbf1; color: #14b8a6;"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+                            <div><h3 style="color: #0d9488;">Daily Reminders</h3><p>Stay consistent with gentle prompts for self-check-ins.</p></div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon-wrapper" style="background-color: #e0f2fe; color: #0ea5e9;"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                            <div><h3 style="color: #0284c7;">Mood Trends & Insights</h3><p>Visualize your emotional patterns to understand triggers.</p></div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon-wrapper" style="background-color: #fef3c7; color: #d97706;"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></div>
+                            <div><h3 style="color: #b45309;">Guided Journaling</h3><p>Reflect and process your thoughts with helpful prompts.</p></div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon-wrapper" style="background-color: #ede9fe; color: #8b5cf6;"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994 .546-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                            <div><h3 style="color: #7c3aed;">Mindfulness Exercises</h3><p>Access tools to calm your mind whenever you need them.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mood Tracker Page --><section data-page="tracker">
+                 <div class="page-header">
+                    <h1>How are you feeling right now?</h1>
+                </div>
+                <div class="mood-selection-area">
+                     <div class="mood-emojis">
+                        <span class="mood-emoji" data-mood="Terrible">😞</span>
+                        <span class="mood-emoji" data-mood="Bad">😟</span>
+                        <span class="mood-emoji" data-mood="Okay">😐</span>
+                        <span class="mood-emoji" data-mood="Good">🙂</span>
+                        <span class="mood-emoji" data-mood="Great">😄</span>
+                    </div>
+                </div>
+
+                <div id="mood-details-wrapper" class="mood-details-wrapper">
+                    <div id="mood-tracker-card" class="page-card mood-tracker-card">
+                        <hr class="section-divider">
+                        <h3 class="section-title">What's influencing your mood?</h3>
+                        <div class="factor-grid">
+                            <button class="factor-btn">Sleep</button> <button class="factor-btn">Work</button>
+                            <button class="factor-btn">Family</button> <button class="factor-btn">Social</button>
+                            <button class="factor-btn">Exercise</button> <button class="factor-btn">Food</button>
+                            <button class="factor-btn">Weather</button> <button class="factor-btn">Health</button>
+                        </div>
+                        <div style="margin-top: 1.5rem;">
+                             <h3 class="section-title" style="margin-top:0;">Add a quick note</h3>
+                            <textarea id="journal-note" class="dotted-textarea" rows="3" placeholder="Any specific thoughts..."></textarea>
+                        </div>
+                        <button id="log-mood-btn" class="log-mood-button">Log My Mood</button>
+                        <div id="log-confirmation">Your mood has been logged!</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Journal Page --><section data-page="journal">
+                 <div class="page-header">
+                    <h1>Your Private Journal</h1>
+                    <p>Use this space to reflect, process, and understand your thoughts without judgment.</p>
+                </div>
+                <div class="two-column-layout">
+                    <div class="sidebar-card">
+                        <h3 class="section-title" style="text-align: left; margin-bottom: 1rem;">Previous Entries</h3>
+                        <div id="journal-entries-list">
+                            <p style="color: var(--color-gray-light);">Your saved entries will appear here.</p>
+                        </div>
+                    </div>
+                    <div class="page-card">
+                        <select id="journal-prompt" style="width:100%; padding:0.75rem; border-radius:0.5rem; border:1px solid var(--color-gray-border); margin-bottom: 1rem;">
+                            <option value="">Choose a prompt or write freely...</option>
+                            <option>What's on your mind today?</option>
+                            <option>Describe one thing you're grateful for.</option>
+                            <option>What is a challenge you're facing right now?</option>
+                            <option>Write about a moment that made you smile recently.</option>
+                        </select>
+                        <textarea id="journal-entry" class="dotted-textarea" rows="12" placeholder="Let your thoughts flow onto the page..."></textarea>
+                        <button id="save-entry-btn" class="save-entry-btn">Save Entry</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Exercises Page --><section data-page="exercises">
+                <div class="page-header">
+                    <h1>Mindfulness & Anxiety Exercises</h1>
+                </div>
+                <div class="exercises-container">
+                    <div class="grid gap-8">
+                        <div class="page-card-full-height">
+                            <h3 style="font-size:1.25rem; font-weight:600; color: #0369a1; margin-bottom:1rem;">4-7-8 Breathing</h3>
+                            <p style="color: var(--color-gray-light); margin-bottom:1.5rem;">A simple technique to calm a busy mind. Follow the animated circle.</p>
+                            <div class="breathing-circle-container">
+                               <div class="breathing-circle-wrapper">
+                                   <div class="breathing-circle"></div>
+                                   <div id="breathing-text" class="breathing-text">Get Ready...</div>
+                               </div>
+                            </div>
+                            <button id="start-breathing-btn" class="start-breathing-btn">Start</button>
+                        </div>
+                        <div class="page-card-full-height">
+                             <h3 style="font-size:1.25rem; font-weight:600; color: #6d28d9; margin-bottom:1rem;">Floating Thoughts</h3>
+                            <p style="color: var(--color-gray-light); margin-bottom:1.5rem;">Click or tap to release a lantern. Watch your thoughts float away.</p>
+                            <div class="canvas-container">
+                                <canvas id="lantern-canvas"></canvas>
+                            </div>
+                        </div>
+                         <div class="page-card-full-height">
+                             <h3 style="font-size:1.25rem; font-weight:600; color: #0d9488; margin-bottom:1rem;">5-4-3-2-1 Grounding</h3>
+                            <p style="color: var(--color-gray-light); margin-bottom:1.5rem;">Use your senses to connect with the present moment.</p>
+                            <ul class="grounding-list">
+                                <li><strong>5 See:</strong> Acknowledge FIVE things you see around you.</li>
+                                <li><strong>4 Touch:</strong> Acknowledge FOUR things you can touch.</li>
+                                <li><strong>3 Hear:</strong> Acknowledge THREE things you hear.</li>
+                                <li><strong>2 Smell:</strong> Acknowledge TWO things you can smell.</li>
+                                <li><strong>1 Taste:</strong> Acknowledge ONE thing you can taste.</li>
+                            </ul>
+                        </div>
+                        <div class="page-card-full-height">
+                             <h3 style="font-size:1.25rem; font-weight:600; color: #db2777; margin-bottom:1rem;">Calm Color Flow</h3>
+                            <p style="color: var(--color-gray-light); margin-bottom:1.5rem;">Gently move your mouse or finger below to create flowing colors.</p>
+                            <div class="canvas-container">
+                                <canvas id="color-flow-canvas"></canvas>
+                            </div>
+                            <div class="canvas-toolbar"><button id="clear-color-canvas-btn" class="clear-canvas-btn">Clear</button></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Time Capsule Page -->
+            <section data-page="capsule">
+                 <div class="page-header">
+                    <h1>A Message to Your Future Self</h1>
+                    <p>Write a message of hope, encouragement, or reflection. Seal it and open it on a future date you choose.</p>
+                </div>
+                <div class="two-column-layout">
+                     <div class="sidebar-card">
+                        <h3 class="section-title" style="text-align: left; margin-bottom: 1rem;">Your Sealed Capsules</h3>
+                        <div id="capsules-list">
+                            <!-- Capsules will be dynamically inserted here -->
+                        </div>
+                    </div>
+                    <div class="page-card">
+                        <div class="capsule-form-container">
+                            <textarea id="capsule-message" class="dotted-textarea" rows="10" placeholder="Dear Future Me..."></textarea>
+                            <label for="capsule-date" style="font-weight: 500;">Set Unlock Date:</label>
+                            <input type="date" id="capsule-date" class="capsule-date-picker">
+                            <button id="seal-capsule-btn" class="home-hero-button" style="width: 100%; border-radius: 0.5rem;">Seal Time Capsule</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resources Page --><section data-page="resources">
+                <div class="page-header">
+                    <h1>Help is Available</h1>
+                    <p>If you are in crisis or need immediate support, please reach out. You are not alone.</p>
+                </div>
+                 <div class="resource-list">
+                    <div class="resource-item emergency">
+                        <h3 style="color:#b91c1c;">Emergency Services</h3>
+                        <p>If you are in immediate danger, call: <strong>911</strong></p>
+                    </div>
+                    <div class="resource-item">
+                        <h3 style="color:var(--color-teal-dark);">National Suicide Prevention Lifeline</h3>
+                        <p>Call or Text: <strong>988</strong></p>
+                    </div>
+                    <div class="resource-item" style="border-color: var(--color-sky);">
+                        <h3 style="color:var(--color-sky-dark);">Crisis Text Line</h3>
+                        <p>Text <strong>HOME</strong> to <strong>741741</strong></p>
+                    </div>
+                     <div class="resource-item">
+                        <h3 style="color:var(--color-teal-dark);">The Trevor Project</h3>
+                        <p>Call: <strong>1-866-488-7386</strong></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer --><footer>
+            <div class="container">
+                <p class="footer-emergency-text">If this is an emergency, please call 911 or a local crisis hotline.</p>
+                <p class="footer-copyright">&copy; 2025 Mood Hue. All rights reserved. This is a concept website and not a substitute for professional medical advice.</p>
+            </div>
+        </footer>
+
+        <!-- Modal -->
+        <div id="capsule-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button id="modal-close-btn" class="modal-close-btn">&times;</button>
+                <h3 id="modal-title" style="font-size: 1.25rem; font-weight: 600;">A Message From Your Past Self</h3>
+                <hr class="section-divider">
+                <div id="modal-message-content"></div>
+                <button id="modal-delete-btn" class="home-hero-button" style="background-color: #ef4444; width: 100%; border-radius: 0.5rem;">Delete This Message</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let lanternAnimationRunning = false;
+            let colorFlowAnimationRunning = false;
+            const bodyEl = document.body;
+            
+            // --- Navigation ---
+            function switchPage(targetId) {
+                document.querySelectorAll('[data-page]').forEach(page => page.classList.remove('active'));
+                const targetPage = document.querySelector(`[data-page="${targetId}"]`);
+                if (targetPage) targetPage.classList.add('active');
+
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.toggle('active', link.dataset.target === targetId);
+                });
+
+                // Stop animations and sounds when leaving the page
+                lanternAnimationRunning = false;
+                colorFlowAnimationRunning = false;
+                
+                if (targetId === 'exercises') {
+                    startLanternAnimation();
+                    startColorFlowAnimation();
+                } else if (targetId === 'capsule') {
+                    renderCapsules();
+                }
+
+                document.getElementById('mobile-menu').style.display = 'none';
+                window.scrollTo(0, 0);
+            }
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchPage(link.dataset.target);
+                });
+            });
+
+            document.getElementById('start-tracking-btn').addEventListener('click', () => switchPage('tracker'));
+            
+            document.getElementById('mobile-menu-button').addEventListener('click', () => {
+                const mobileMenu = document.getElementById('mobile-menu');
+                const isHidden = mobileMenu.style.display === 'none' || !mobileMenu.style.display;
+                mobileMenu.style.display = isHidden ? 'block' : 'none';
+            });
+            
+            window.addEventListener('scroll', () => {
+                document.getElementById('main-header').classList.toggle('scrolled', window.scrollY > 10);
+            });
+
+            // --- Mood Tracker Logic ---
+            const moodTrackerCard = document.getElementById('mood-tracker-card');
+            const moodEmojis = document.querySelectorAll('.mood-emoji');
+            const moodDetailsWrapper = document.getElementById('mood-details-wrapper');
+            const factorBtns = document.querySelectorAll('.factor-btn');
+            const logMoodBtn = document.getElementById('log-mood-btn');
+            const logConfirmation = document.getElementById('log-confirmation');
+            let selectedMood = null;
+
+            function resetBodyBackground() {
+                bodyEl.classList.remove('body-mood-great', 'body-mood-good', 'body-mood-okay', 'body-mood-bad', 'body-mood-terrible');
+                bodyEl.classList.add('animated-pastel-gradient');
+            }
+
+            moodEmojis.forEach(emoji => {
+                emoji.addEventListener('click', () => {
+                    moodEmojis.forEach(e => e.classList.remove('selected'));
+                    emoji.classList.add('selected');
+                    
+                    selectedMood = emoji.dataset.mood.toLowerCase();
+                    
+                    moodTrackerCard.className = 'page-card mood-tracker-card';
+                    moodTrackerCard.classList.add(`mood-${selectedMood}`);
+
+                    resetBodyBackground();
+                    bodyEl.classList.remove('animated-pastel-gradient');
+                    bodyEl.classList.add(`body-mood-${selectedMood}`);
+
+                    moodDetailsWrapper.classList.add('visible');
+                });
+            });
+
+            factorBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.classList.toggle('active');
+                    if (btn.classList.contains('active')) {
+                        btn.style.backgroundColor = 'var(--color-teal)';
+                        btn.style.color = 'white';
+                    } else {
+                        btn.style.backgroundColor = '#f3f4f6';
+                        btn.style.color = 'var(--color-gray-text)';
+                    }
+                });
+            });
+
+            logMoodBtn.addEventListener('click', () => {
+                if (selectedMood) {
+                    logConfirmation.style.opacity = '1';
+                    setTimeout(() => { 
+                        logConfirmation.style.opacity = '0'; 
+                        moodDetailsWrapper.classList.remove('visible');
+                        moodTrackerCard.className = 'page-card mood-tracker-card';
+                        moodEmojis.forEach(e => e.classList.remove('selected'));
+                        factorBtns.forEach(b => {
+                            b.classList.remove('active');
+                            b.style.backgroundColor = '#f3f4f6';
+                            b.style.color = 'var(--color-gray-text)';
+                        });
+                        document.getElementById('journal-note').value = '';
+                        selectedMood = null;
+                        resetBodyBackground();
+
+                    }, 2000);
+                } else {
+                    alert('Please select a mood first.');
+                }
+            });
+
+            // --- Journal Logic ---
+            const journalPrompt = document.getElementById('journal-prompt');
+            const journalEntry = document.getElementById('journal-entry');
+            const saveEntryBtn = document.getElementById('save-entry-btn');
+            const entriesList = document.getElementById('journal-entries-list');
+
+            journalPrompt.addEventListener('change', () => {
+                if(journalPrompt.value) {
+                    journalEntry.value = journalPrompt.value + "\n\n";
+                    journalEntry.focus();
+                }
+            });
+
+            saveEntryBtn.addEventListener('click', () => {
+                const entryText = journalEntry.value.trim();
+                if (entryText) {
+                    const date = new Date();
+                    const entryEl = document.createElement('div');
+                    entryEl.className = 'journal-entry-card';
+                    entryEl.innerHTML = `
+                        <p>${date.toLocaleDateString()} at ${date.toLocaleTimeString()}</p>
+                        <p>${entryText.replace(/\n/g, '<br>')}</p>
+                    `;
+                    
+                    if(entriesList.querySelector('p')) {
+                        entriesList.innerHTML = '';
+                    }
+
+                    entriesList.prepend(entryEl);
+                    journalEntry.value = '';
+                    journalPrompt.value = '';
+                }
+            });
+            
+            // --- Breathing Exercise Logic ---
+            const startBreathingBtn = document.getElementById('start-breathing-btn');
+            const breathingText = document.getElementById('breathing-text');
+            let breathingInterval;
+
+            function runBreathingCycle() {
+                breathingText.textContent = "Breathe In...";
+                setTimeout(() => { breathingText.textContent = "Hold..."; }, 4000);
+                setTimeout(() => { breathingText.textContent = "Breathe Out..."; }, 7000);
+            }
+
+            startBreathingBtn.addEventListener('click', () => {
+                if (breathingInterval) {
+                    clearInterval(breathingInterval);
+                    breathingInterval = null;
+                    startBreathingBtn.textContent = "Start";
+                    breathingText.textContent = "Paused";
+                } else {
+                    runBreathingCycle();
+                    breathingInterval = setInterval(runBreathingCycle, 8000);
+                    startBreathingBtn.textContent = "Pause";
+                }
+            });
+
+             // --- Canvas Setup ---
+            function setupCanvas(canvas) {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                if (rect.width === 0) return;
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                canvas.style.width = `${rect.width}px`;
+                canvas.style.height = `${rect.height}px`;
+                const ctx = canvas.getContext('2d');
+                ctx.scale(dpr, dpr);
+                return ctx;
+            }
+
+            // --- Floating Lanterns Logic ---
+            const lanternCanvas = document.getElementById('lantern-canvas');
+            let lanterns = [], stars = [];
+            
+            function animateLanterns() { /* ... function ... */ }
+
+            function startLanternAnimation() {
+                if (lanternAnimationRunning) return;
+                lanternAnimationRunning = true;
+                setTimeout(() => {
+                    const ctx = setupCanvas(lanternCanvas);
+                    if (!ctx) return;
+                    // Full lantern animation logic here
+                }, 100);
+            }
+            lanternCanvas.addEventListener('click', (e) => { /* ... event listener ... */ });
+            
+            // --- Color Flow Logic ---
+            const colorCanvas = document.getElementById('color-flow-canvas');
+            const clearColorCanvasBtn = document.getElementById('clear-color-canvas-btn');
+            let colorCtx, isPainting = false, hue = 0;
+            
+            function draw(e) {
+                if (!isPainting) return;
+                const rect = colorCanvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                
+                colorCtx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
+                colorCtx.lineWidth = 10;
+                colorCtx.lineCap = 'round';
+                colorCtx.lineJoin = 'round';
+
+                colorCtx.lineTo(x, y);
+                colorCtx.stroke();
+                colorCtx.beginPath();
+                colorCtx.moveTo(x, y);
+
+                hue = (hue + 1) % 360;
+            }
+
+            function startColorFlowAnimation() {
+                if (colorFlowAnimationRunning) return;
+                colorFlowAnimationRunning = true;
+                setTimeout(() => {
+                    colorCtx = setupCanvas(colorCanvas);
+                    if (!colorCtx) return;
+                    colorCtx.fillStyle = '#111827';
+                    colorCtx.fillRect(0,0, colorCanvas.offsetWidth, colorCanvas.offsetHeight);
+                }, 100);
+            }
+
+            colorCanvas.addEventListener('mousedown', (e) => { isPainting = true; draw(e); });
+            colorCanvas.addEventListener('touchstart', (e) => { isPainting = true; draw(e); });
+            colorCanvas.addEventListener('mouseup', () => { isPainting = false; colorCtx.beginPath(); });
+            colorCanvas.addEventListener('touchend', () => { isPainting = false; colorCtx.beginPath(); });
+            colorCanvas.addEventListener('mousemove', draw);
+            colorCanvas.addEventListener('touchmove', draw);
+            clearColorCanvasBtn.addEventListener('click', () => {
+                colorCtx.fillStyle = '#111827';
+                colorCtx.fillRect(0,0, colorCanvas.offsetWidth, colorCanvas.offsetHeight);
+            });
+
+            // Re-adding full class definitions here to avoid being cut off
+            class StarFull {
+                constructor(canvas) {
+                    this.x = Math.random() * canvas.offsetWidth;
+                    this.y = Math.random() * canvas.offsetHeight;
+                    this.radius = Math.random() * 1.5;
+                    this.alpha = Math.random() * 0.5 + 0.5;
+                    this.alphaChange = (Math.random() * 0.02) - 0.01;
+                }
+                draw(ctx) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                    ctx.fill();
+                }
+                update() {
+                    this.alpha += this.alphaChange;
+                    if (this.alpha > 1 || this.alpha < 0.2) {
+                        this.alphaChange *= -1;
+                    }
+                }
+            }
+
+            class LanternFull {
+                constructor(x, y, canvas) {
+                    this.x = x;
+                    this.y = y;
+                    this.canvasHeight = canvas.offsetHeight;
+                    this.size = Math.random() * 10 + 15;
+                    this.speedY = Math.random() * 0.5 + 0.2;
+                    this.speedX = (Math.random() - 0.5) * 0.2;
+                    this.life = 1;
+                    this.hue = Math.random() * 60 + 20; // warm colors
+                }
+                update() {
+                    this.y -= this.speedY;
+                    this.x += this.speedX;
+                    if (this.y < this.canvasHeight * 0.6) {
+                         this.life -= 0.005;
+                    }
+                    if (this.life < 0) this.life = 0;
+                }
+                draw(ctx) {
+                    ctx.save();
+                    ctx.globalAlpha = this.life;
+                    ctx.beginPath();
+                    ctx.fillStyle = `hsl(${this.hue}, 100%, 60%)`;
+                    ctx.roundRect(this.x - this.size / 2, this.y - this.size, this.size, this.size, [4]);
+                    ctx.fill();
+                    const glowGradient = ctx.createRadialGradient(this.x, this.y - this.size/2, 0, this.x, this.y - this.size/2, this.size * 1.5);
+                    glowGradient.addColorStop(0, `hsla(${this.hue}, 100%, 70%, 0.5)`);
+                    glowGradient.addColorStop(1, "hsla(0, 0%, 0%, 0)");
+                    ctx.fillStyle = glowGradient;
+                    ctx.fillRect(this.x - this.size * 2, this.y - this.size * 2, this.size * 4, this.size * 4);
+                    ctx.restore();
+                }
+            }
+            const lanternCtx = lanternCanvas.getContext('2d');
+            function animateLanternsFull() {
+                if (!lanternAnimationRunning) return;
+                const rect = lanternCanvas.parentElement.getBoundingClientRect();
+                const skyGradient = lanternCtx.createLinearGradient(0, 0, 0, rect.height);
+                skyGradient.addColorStop(0, '#1e283b');
+                skyGradient.addColorStop(1, '#475569');
+                lanternCtx.fillStyle = skyGradient;
+                lanternCtx.fillRect(0, 0, rect.width, rect.height);
+
+                stars.forEach(star => { star.update(); star.draw(lanternCtx); });
+                lanterns.forEach((lantern, index) => {
+                    lantern.update(); lantern.draw(lanternCtx);
+                    if (lantern.y < -lantern.size || lantern.life <= 0) lanterns.splice(index, 1);
+                });
+                requestAnimationFrame(animateLanternsFull);
+            }
+
+            function startLanternAnimation() {
+                 if (lanternAnimationRunning) return;
+                lanternAnimationRunning = true;
+                setTimeout(() => {
+                    const ctx = setupCanvas(lanternCanvas);
+                    if (!ctx) return;
+                    stars = []; for(let i = 0; i < 100; i++) stars.push(new StarFull(lanternCanvas));
+                    animateLanternsFull();
+                }, 100);
+            }
+            lanternCanvas.addEventListener('click', (e) => {
+                 const rect = lanternCanvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                lanterns.push(new LanternFull(x, y, lanternCanvas));
+                 if (lanterns.length > 25) lanterns.shift();
+            });
+
+            // --- Time Capsule Logic ---
+            const capsuleMessageEl = document.getElementById('capsule-message');
+            const capsuleDateEl = document.getElementById('capsule-date');
+            const sealCapsuleBtn = document.getElementById('seal-capsule-btn');
+            const capsulesListEl = document.getElementById('capsules-list');
+            const modalEl = document.getElementById('capsule-modal');
+            const modalMessageContentEl = document.getElementById('modal-message-content');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const modalDeleteBtn = document.getElementById('modal-delete-btn');
+            let currentCapsuleId = null;
+
+            // Set min date for date picker to tomorrow
+            const today = new Date();
+            today.setDate(today.getDate() + 1);
+            capsuleDateEl.min = today.toISOString().split("T")[0];
+            capsuleDateEl.value = today.toISOString().split("T")[0];
+
+            function getCapsules() {
+                return JSON.parse(localStorage.getItem('moodHueCapsules') || '[]');
+            }
+
+            function saveCapsules(capsules) {
+                localStorage.setItem('moodHueCapsules', JSON.stringify(capsules));
+            }
+
+            sealCapsuleBtn.addEventListener('click', () => {
+                const message = capsuleMessageEl.value.trim();
+                const unlockDate = capsuleDateEl.value;
+
+                if (!message || !unlockDate) {
+                    alert('Please write a message and select an unlock date.');
+                    return;
+                }
+
+                const capsules = getCapsules();
+                capsules.push({
+                    id: Date.now(),
+                    message: message,
+                    unlockDate: unlockDate
+                });
+                saveCapsules(capsules);
+
+                capsuleMessageEl.value = '';
+                renderCapsules();
+            });
+
+            function renderCapsules() {
+                const capsules = getCapsules();
+                capsulesListEl.innerHTML = '';
+
+                if (capsules.length === 0) {
+                    capsulesListEl.innerHTML = `<p style="color: var(--color-gray-light); text-align: center;">You have no sealed capsules.</p>`;
+                    return;
+                }
+                
+                const now = new Date();
+                now.setHours(0,0,0,0);
+
+                capsules.forEach(capsule => {
+                    const unlockDate = new Date(capsule.unlockDate);
+                    unlockDate.setMinutes(unlockDate.getMinutes() + unlockDate.getTimezoneOffset()); // Adjust for timezone
+                    const isLocked = unlockDate > now;
+                    const formattedDate = unlockDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                    const item = document.createElement('div');
+                    item.className = `capsule-item ${isLocked ? 'locked' : 'unlocked'}`;
+                    
+                    let content = `
+                        <svg class="capsule-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          ${isLocked 
+                            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />'
+                            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />'}
+                        </svg>
+                        <div class="capsule-info">
+                            <p><strong>${isLocked ? 'Locked' : 'Ready to Open!'}</strong></p>
+                            <p>Unlocks: ${formattedDate}</p>
+                        </div>
+                    `;
+
+                    if (!isLocked) {
+                         item.style.cursor = 'pointer';
+                         item.dataset.capsuleId = capsule.id;
+                    }
+
+                    item.innerHTML = content;
+                    capsulesListEl.appendChild(item);
+                });
+            }
+            
+            capsulesListEl.addEventListener('click', (e) => {
+                const capsuleItem = e.target.closest('.capsule-item.unlocked');
+                if (capsuleItem) {
+                    const capsuleId = capsuleItem.dataset.capsuleId;
+                    const capsules = getCapsules();
+                    const capsule = capsules.find(c => c.id == capsuleId);
+                    if (capsule) {
+                        openModal(capsule);
+                    }
+                }
+            });
+
+            function openModal(capsule) {
+                currentCapsuleId = capsule.id;
+                modalMessageContentEl.textContent = capsule.message;
+                modalEl.classList.add('visible');
+            }
+
+            function closeModal() {
+                modalEl.classList.remove('visible');
+                currentCapsuleId = null;
+            }
+
+            modalCloseBtn.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeModal();
+                }
+            });
+
+            modalDeleteBtn.addEventListener('click', () => {
+                if (currentCapsuleId) {
+                    let capsules = getCapsules();
+                    capsules = capsules.filter(c => c.id !== currentCapsuleId);
+                    saveCapsules(capsules);
+                    renderCapsules();
+                    closeModal();
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
+
